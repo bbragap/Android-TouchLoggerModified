@@ -1,5 +1,6 @@
 package com.touchlogger;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +16,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Map<CaptureIntentMessage, Intent> intents;
 
+    public static Context context = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
             intent.setAction(message.name());
             intents.put(message, intent);
         }
-
+        context = getApplicationContext();
 //        startService(intents.get(CaptureIntentMessage.START));
     }
 

@@ -5,8 +5,11 @@ import android.graphics.Point;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
+import com.touchlogger.MainActivity;
 import com.touchlogger.gestures.Gesture;
 import com.touchlogger.gestures.GestureDetectSink;
 import com.touchlogger.gestures.GestureDetector;
@@ -15,17 +18,26 @@ import com.touchlogger.touch.TouchEvent;
 import com.touchlogger.touch.TouchEventSerializer;
 import com.touchlogger.touch.TouchEventsSink;
 import com.touchlogger.touch.TouchEventsSource;
+import com.touchlogger.touch.TouchPoint;
 import com.touchlogger.utils.Configuration;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+
+import static android.content.Context.MODE_APPEND;
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by Patrick on 23.05.2016.
@@ -58,6 +70,8 @@ public class CaptureThread extends Thread {
         @Override
         public void onTouchEvents(ArrayList<TouchEvent> touchEvents) {
             sendTouchEvents(touchEvents);
+            System.out.println(touchEvents);
+            System.out.println("Teste");
         }
     }
 
@@ -349,11 +363,40 @@ public class CaptureThread extends Thread {
         }
     }
 
+
+
     class GestureNotifier implements GestureDetectSink {
+
 
         @Override
         public void onGestureDetect(Gesture gesture, ArrayList<TouchEvent> events) {
-            printStatus("Detected: " + gesture, Status.capturing);
+            String pts = "";
+
+            String fileName = "Posicoes.txt";
+
+            for (int i = 0; i < events.size (); i++) {
+                TouchEvent evt = events.get (i);
+                pts += gesture.toString() +";"+ System.currentTimeMillis() +";";
+                for (TouchPoint point : evt.getTouchPoints()) {
+                    pts += point.x + ";" + point.y + ";";
+                }
+                pts += "\n";
+            }
+                                /*+ gesture +*/
+            printStatus("Detected: " + pts, Status.capturing);
+            File f = MainActivity.context.getExternalFilesDir(null);
+            try {
+                FileOutputStream fileOutputStream = new FileOutputStream(f.getAbsolutePath() + "/" + fileName, true);
+                fileOutputStream.write(pts.getBytes());
+                fileOutputStream.flush();
+                fileOutputStream.close();
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+
+            }catch (IOException e){
+                e.printStackTrace();
+            }
         }
     }
 
